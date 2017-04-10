@@ -1,7 +1,5 @@
 package main;
 
-import javax.swing.SwingUtilities;
-
 import core.Adb;
 import core.DeviceMonitor;
 

@@ -23,6 +23,7 @@ public class Stalker implements Runnable{
 				return;
 			}
 			System.out.println("Stalking " + adb.deviceID + "...");
+			adb.toTCPMode();
 			wait(2000);
 		}
 	}
