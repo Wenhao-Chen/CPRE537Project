@@ -2,6 +2,7 @@ package main;
 
 import core.Adb;
 import core.DeviceMonitor;
+import server.HTTPServer;
 
 
 public class Main {
@@ -12,7 +13,7 @@ public class Main {
 		
 		new DeviceMonitor().start();
 		
-		
+		HTTPServer.start();
 	}
 
 }

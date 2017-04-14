@@ -32,7 +32,7 @@ public class Stalker implements Runnable{
 				adb.connectTCP();
 			
 			// 2. regular payload
-			device.runningProcesses = P.read(adb.sendCmd("shell ps |grep ").getInputStream());
+			device.runningProcesses = P.read(adb.sendCmd("shell ps").getInputStream());
 			P.print(device.runningProcesses);
 			
 			
@@ -42,7 +42,7 @@ public class Stalker implements Runnable{
 			
 			
 			
-			wait(200);
+			wait(2000);
 		}
 	}
 	
