@@ -91,7 +91,7 @@ public class Adb {
 		ArrayList<String> devices = getDevices();
 		if (devices.size() == 0)
 		{
-			System.err.println("No android devices currently connected to adb server");
+			System.err.println("No android devices currently connected to adb");
 		}
 		else
 		{
