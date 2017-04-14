@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class DeviceMonitor implements Runnable{
 
-	private ArrayList<Stalker> stalkers;
+	public ArrayList<Stalker> stalkers;
 	public static ArrayList<DeviceInfo> victims;
 	public static ArrayList<String> adbDevices;
 	

